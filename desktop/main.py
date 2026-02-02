@@ -1,6 +1,10 @@
 import sys
 import requests
 import base64
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+import numpy as np
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -8,38 +12,85 @@ from PyQt5.QtGui import *
 class LoginDialog(QDialog):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Chemical Equipment Visualizer - Login")
-        self.setFixedSize(350, 200)
+        self.setWindowTitle("Chemora - Desktop Login")
+        self.setFixedSize(400, 300)
+        self.setStyleSheet("""
+            QDialog {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
+                    stop:0 #667eea, stop:1 #764ba2);
+            }
+            QLabel {
+                color: white;
+                font-family: 'Segoe UI', Arial, sans-serif;
+            }
+            QLineEdit {
+                padding: 12px;
+                border: 2px solid rgba(255,255,255,0.3);
+                border-radius: 8px;
+                background: rgba(255,255,255,0.9);
+                font-size: 14px;
+            }
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #4facfe, stop:1 #00f2fe);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #43a3f5, stop:1 #00d9fe);
+            }
+        """)
         
         layout = QVBoxLayout()
+        layout.setSpacing(20)
+        layout.setContentsMargins(40, 40, 40, 40)
         
-        title = QLabel("Chemical Equipment Visualizer")
+        # Logo and title
+        logo_layout = QHBoxLayout()
+        logo_layout.setAlignment(Qt.AlignCenter)
+        
+        title = QLabel("🧪 Chemora Desktop")
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("font-size: 16px; font-weight: bold; margin: 10px;")
+        title.setStyleSheet("font-size: 24px; font-weight: bold; margin: 20px; color: white;")
         
+        subtitle = QLabel("Chemical Equipment Analytics Platform")
+        subtitle.setAlignment(Qt.AlignCenter)
+        subtitle.setStyleSheet("font-size: 14px; color: rgba(255,255,255,0.8); margin-bottom: 20px;")
+        
+        # Input fields
         self.username_input = QLineEdit()
-        self.username_input.setPlaceholderText("Username (admin)")
+        self.username_input.setPlaceholderText("Username (default: admin)")
         self.password_input = QLineEdit()
-        self.password_input.setPlaceholderText("Password (admin)")
+        self.password_input.setPlaceholderText("Password (default: admin)")
         self.password_input.setEchoMode(QLineEdit.Password)
         
-        login_btn = QPushButton("Login")
+        login_btn = QPushButton("🚀 Launch Dashboard")
         login_btn.clicked.connect(self.accept)
-        login_btn.setStyleSheet("QPushButton { background-color: #007bff; color: white; padding: 8px; }")
+        
+        demo_label = QLabel("💡 Demo: admin / admin")
+        demo_label.setAlignment(Qt.AlignCenter)
+        demo_label.setStyleSheet("font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 10px;")
         
         layout.addWidget(title)
+        layout.addWidget(subtitle)
         layout.addWidget(QLabel("Username:"))
         layout.addWidget(self.username_input)
         layout.addWidget(QLabel("Password:"))
         layout.addWidget(self.password_input)
         layout.addWidget(login_btn)
+        layout.addWidget(demo_label)
         
         self.setLayout(layout)
     
     def get_credentials(self):
         return self.username_input.text(), self.password_input.text()
 
-class TextChartsWidget(QWidget):
+class ChartsWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -47,8 +98,15 @@ class TextChartsWidget(QWidget):
     def init_ui(self):
         layout = QVBoxLayout()
         
+        # Create scroll area for charts
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
+        scroll.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: #f8f9fa;
+            }
+        """)
         
         self.charts_widget = QWidget()
         self.charts_layout = QVBoxLayout()
@@ -59,183 +117,286 @@ class TextChartsWidget(QWidget):
         
         self.setLayout(layout)
     
-    def create_bar_chart(self, title, data, labels, colors=None):
-        chart_widget = QGroupBox(title)
-        chart_layout = QVBoxLayout()
+    def create_matplotlib_chart(self, chart_type, title, data, labels=None, colors=None):
+        """Create matplotlib chart widget"""
+        fig = Figure(figsize=(10, 6), dpi=100)
+        fig.patch.set_facecolor('white')
         
-        if not data or not labels:
-            chart_layout.addWidget(QLabel("No data available"))
-            chart_widget.setLayout(chart_layout)
-            return chart_widget
+        ax = fig.add_subplot(111)
         
-        max_value = max(data) if data else 1
-        chart_width = 40
+        if chart_type == 'bar':
+            bars = ax.bar(labels, data, color=colors or ['#4facfe', '#00f2fe', '#43a3f5'])
+            ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
+            ax.set_ylabel('Values', fontsize=12)
+            
+            # Add value labels on bars
+            for bar, value in zip(bars, data):
+                height = bar.get_height()
+                ax.text(bar.get_x() + bar.get_width()/2., height + max(data)*0.01,
+                       f'{value:.2f}', ha='center', va='bottom', fontweight='bold')
         
-        for i, (label, value) in enumerate(zip(labels, data)):
-            row_layout = QHBoxLayout()
+        elif chart_type == 'pie':
+            colors = colors or ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
+            wedges, texts, autotexts = ax.pie(data, labels=labels, colors=colors, autopct='%1.1f%%',
+                                            startangle=90, textprops={'fontsize': 10})
+            ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
             
-            label_widget = QLabel(f"{label}:")
-            label_widget.setFixedWidth(100)
-            label_widget.setAlignment(Qt.AlignRight)
-            
-            bar_length = int((value / max_value) * chart_width) if max_value > 0 else 0
-            bar_text = "█" * bar_length + "░" * (chart_width - bar_length)
-            bar_widget = QLabel(bar_text)
-            bar_widget.setFont(QFont("Courier", 8))
-            
-            if colors and i < len(colors):
-                bar_widget.setStyleSheet(f"color: {colors[i]};")
-            
-            value_widget = QLabel(f" {value:.2f}")
-            value_widget.setFixedWidth(80)
-            
-            row_layout.addWidget(label_widget)
-            row_layout.addWidget(bar_widget)
-            row_layout.addWidget(value_widget)
-            row_layout.addStretch()
-            
-            chart_layout.addLayout(row_layout)
+            # Make percentage text bold
+            for autotext in autotexts:
+                autotext.set_color('white')
+                autotext.set_fontweight('bold')
         
-        chart_widget.setLayout(chart_layout)
-        return chart_widget
+        elif chart_type == 'scatter':
+            x_data, y_data = data
+            scatter = ax.scatter(x_data, y_data, c='#4facfe', alpha=0.7, s=60, edgecolors='white', linewidth=1)
+            ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
+            ax.set_xlabel(labels[0] if labels else 'X', fontsize=12)
+            ax.set_ylabel(labels[1] if labels else 'Y', fontsize=12)
+            ax.grid(True, alpha=0.3)
+            
+            # Add trend line
+            if len(x_data) > 1:
+                z = np.polyfit(x_data, y_data, 1)
+                p = np.poly1d(z)
+                ax.plot(x_data, p(x_data), "--", color='#ff6b6b', alpha=0.8, linewidth=2)
+        
+        elif chart_type == 'line':
+            ax.plot(range(len(data)), data, marker='o', linewidth=3, markersize=8, 
+                   color='#4facfe', markerfacecolor='#00f2fe', markeredgecolor='white', markeredgewidth=2)
+            ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
+            ax.set_xlabel('Equipment Index', fontsize=12)
+            ax.set_ylabel('Temperature (°C)', fontsize=12)
+            ax.grid(True, alpha=0.3)
+            ax.fill_between(range(len(data)), data, alpha=0.3, color='#4facfe')
+        
+        # Style the plot
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['left'].set_color('#ddd')
+        ax.spines['bottom'].set_color('#ddd')
+        ax.tick_params(colors='#666')
+        
+        fig.tight_layout()
+        
+        canvas = FigureCanvas(fig)
+        canvas.setMinimumHeight(400)
+        
+        return canvas
     
-    def create_pie_chart(self, title, data_dict):
-        chart_widget = QGroupBox(title)
-        chart_layout = QVBoxLayout()
+    def create_stats_card(self, title, stats_data):
+        """Create a statistics card widget"""
+        card = QGroupBox()
+        card.setStyleSheet("""
+            QGroupBox {
+                background-color: white;
+                border: 2px solid #e9ecef;
+                border-radius: 12px;
+                margin: 10px;
+                padding: 20px;
+            }
+        """)
         
-        if not data_dict:
-            chart_layout.addWidget(QLabel("No data available"))
-            chart_widget.setLayout(chart_layout)
-            return chart_widget
+        layout = QVBoxLayout()
         
-        total = sum(data_dict.values())
-        colors = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"]
+        title_label = QLabel(title)
+        title_label.setStyleSheet("""
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        """)
         
-        for i, (label, value) in enumerate(data_dict.items()):
-            percentage = (value / total) * 100 if total > 0 else 0
-            
-            row_layout = QHBoxLayout()
-            
-            color_label = QLabel("●")
-            color_label.setStyleSheet(f"color: {colors[i % len(colors)]}; font-size: 16px;")
-            color_label.setFixedWidth(20)
-            
-            text_label = QLabel(f"{label}: {value} ({percentage:.1f}%)")
-            text_label.setFixedWidth(200)
-            
-            bar_length = int(percentage / 2)
-            bar_text = "█" * bar_length
-            bar_label = QLabel(bar_text)
-            bar_label.setStyleSheet(f"color: {colors[i % len(colors)]};")
-            bar_label.setFont(QFont("Courier", 8))
-            
-            row_layout.addWidget(color_label)
-            row_layout.addWidget(text_label)
-            row_layout.addWidget(bar_label)
-            row_layout.addStretch()
-            
-            chart_layout.addLayout(row_layout)
+        stats_text = "\n".join([f"{key}: {value}" for key, value in stats_data.items()])
+        stats_label = QLabel(stats_text)
+        stats_label.setStyleSheet("""
+            font-size: 14px;
+            color: #34495e;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        """)
         
-        chart_widget.setLayout(chart_layout)
-        return chart_widget
-    
-    def create_scatter_plot(self, title, x_data, y_data, x_label, y_label):
-        chart_widget = QGroupBox(title)
-        chart_layout = QVBoxLayout()
+        layout.addWidget(title_label)
+        layout.addWidget(stats_label)
+        card.setLayout(layout)
         
-        if not x_data or not y_data:
-            chart_layout.addWidget(QLabel("No data available"))
-            chart_widget.setLayout(chart_layout)
-            return chart_widget
-        
-        info_text = f"""{x_label} vs {y_label} Analysis:
-
-Data Points: {len(x_data)}
-{x_label} Range: {min(x_data):.2f} - {max(x_data):.2f}
-{y_label} Range: {min(y_data):.2f} - {max(y_data):.2f}
-
-Correlation: {'Positive' if sum(x*y for x,y in zip(x_data, y_data)) > 0 else 'Negative'}"""
-        
-        info_label = QLabel(info_text)
-        info_label.setStyleSheet("background-color: #f8f9fa; padding: 10px; border-radius: 5px;")
-        chart_layout.addWidget(info_label)
-        
-        scatter_text = "Scatter Plot Visualization:\n\n"
-        
-        if x_data and y_data:
-            x_min, x_max = min(x_data), max(x_data)
-            y_min, y_max = min(y_data), max(y_data)
-            
-            grid_size = 10
-            grid = [['·' for _ in range(grid_size)] for _ in range(grid_size)]
-            
-            for x, y in zip(x_data, y_data):
-                if x_max > x_min and y_max > y_min:
-                    x_pos = int(((x - x_min) / (x_max - x_min)) * (grid_size - 1))
-                    y_pos = int(((y - y_min) / (y_max - y_min)) * (grid_size - 1))
-                    grid[grid_size - 1 - y_pos][x_pos] = '●'
-            
-            for row in grid:
-                scatter_text += ''.join(row) + '\n'
-        
-        scatter_label = QLabel(scatter_text)
-        scatter_label.setFont(QFont("Courier", 10))
-        scatter_label.setStyleSheet("background-color: #ffffff; padding: 10px; border: 1px solid #ddd;")
-        chart_layout.addWidget(scatter_label)
-        
-        chart_widget.setLayout(chart_layout)
-        return chart_widget
+        return card
     
     def plot_data(self, data, summary):
+        """Plot all charts with the provided data"""
+        # Clear existing charts
         for i in reversed(range(self.charts_layout.count())): 
             self.charts_layout.itemAt(i).widget().setParent(None)
         
         if not data or not summary:
-            no_data_label = QLabel("No data available for visualization")
+            no_data_label = QLabel("📈 No data available for visualization")
             no_data_label.setAlignment(Qt.AlignCenter)
-            no_data_label.setStyleSheet("font-size: 14px; color: #666; padding: 50px;")
+            no_data_label.setStyleSheet("""
+                font-size: 18px; 
+                color: #6c757d; 
+                padding: 100px;
+                background-color: white;
+                border-radius: 12px;
+                margin: 20px;
+            """)
             self.charts_layout.addWidget(no_data_label)
             return
         
+        # 1. Average Parameters Bar Chart
         avg_labels = ['Flowrate', 'Pressure', 'Temperature']
         avg_values = [summary['avg_flowrate'], summary['avg_pressure'], summary['avg_temperature']]
-        avg_colors = ['#FF6384', '#36A2EB', '#FFCE56']
+        avg_colors = ['#4facfe', '#00f2fe', '#43a3f5']
         
-        avg_chart = self.create_bar_chart("📊 Average Parameters", avg_values, avg_labels, avg_colors)
+        avg_chart = self.create_matplotlib_chart('bar', '📈 Average Equipment Parameters', 
+                                                avg_values, avg_labels, avg_colors)
         self.charts_layout.addWidget(avg_chart)
         
-        type_chart = self.create_pie_chart("🏭 Equipment Type Distribution", summary['type_distribution'])
-        self.charts_layout.addWidget(type_chart)
+        # 2. Equipment Type Distribution Pie Chart
+        if summary['type_distribution']:
+            type_labels = list(summary['type_distribution'].keys())
+            type_values = list(summary['type_distribution'].values())
+            
+            pie_chart = self.create_matplotlib_chart('pie', '🏢 Equipment Type Distribution', 
+                                                    type_values, type_labels)
+            self.charts_layout.addWidget(pie_chart)
         
+        # 3. Flowrate vs Pressure Scatter Plot
         flowrates = [item['flowrate'] for item in data]
         pressures = [item['pressure'] for item in data]
-        scatter_chart = self.create_scatter_plot("📈 Flowrate vs Pressure Analysis", 
-                                               flowrates, pressures, "Flowrate", "Pressure")
+        
+        scatter_chart = self.create_matplotlib_chart('scatter', '🔄 Flowrate vs Pressure Correlation', 
+                                                    (flowrates, pressures), ['Flowrate', 'Pressure'])
         self.charts_layout.addWidget(scatter_chart)
         
+        # 4. Temperature Trend Line Chart
         temperatures = [item['temperature'] for item in data]
-        temp_stats = f"""🌡️ Temperature Distribution Analysis:
-
-Count: {len(temperatures)}
-Minimum: {min(temperatures):.2f}°
-Maximum: {max(temperatures):.2f}°
-Average: {sum(temperatures)/len(temperatures):.2f}°
-Range: {max(temperatures) - min(temperatures):.2f}°"""
+        temp_chart = self.create_matplotlib_chart('line', '🌡️ Temperature Distribution Across Equipment', 
+                                                 temperatures)
+        self.charts_layout.addWidget(temp_chart)
         
-        temp_widget = QGroupBox("Temperature Statistics")
-        temp_layout = QVBoxLayout()
-        temp_label = QLabel(temp_stats)
-        temp_label.setStyleSheet("background-color: #fff3cd; padding: 15px; border-radius: 5px;")
-        temp_layout.addWidget(temp_label)
-        temp_widget.setLayout(temp_layout)
+        # 5. Statistics Cards
+        temp_stats = {
+            f"📈 Total Equipment": f"{len(data)} items",
+            f"🌡️ Min Temperature": f"{min(temperatures):.2f}°C",
+            f"🌡️ Max Temperature": f"{max(temperatures):.2f}°C",
+            f"🌡️ Avg Temperature": f"{sum(temperatures)/len(temperatures):.2f}°C",
+            f"📉 Temperature Range": f"{max(temperatures) - min(temperatures):.2f}°C"
+        }
         
-        self.charts_layout.addWidget(temp_widget)
+        flow_stats = {
+            f"💧 Min Flowrate": f"{min(flowrates):.2f}",
+            f"💧 Max Flowrate": f"{max(flowrates):.2f}",
+            f"💧 Avg Flowrate": f"{sum(flowrates)/len(flowrates):.2f}",
+            f"📉 Flowrate Range": f"{max(flowrates) - min(flowrates):.2f}"
+        }
+        
+        pressure_stats = {
+            f"⚙️ Min Pressure": f"{min(pressures):.2f}",
+            f"⚙️ Max Pressure": f"{max(pressures):.2f}",
+            f"⚙️ Avg Pressure": f"{sum(pressures)/len(pressures):.2f}",
+            f"📉 Pressure Range": f"{max(pressures) - min(pressures):.2f}"
+        }
+        
+        # Create horizontal layout for stats cards
+        stats_widget = QWidget()
+        stats_layout = QHBoxLayout()
+        
+        stats_layout.addWidget(self.create_stats_card("🌡️ Temperature Analysis", temp_stats))
+        stats_layout.addWidget(self.create_stats_card("💧 Flowrate Analysis", flow_stats))
+        stats_layout.addWidget(self.create_stats_card("⚙️ Pressure Analysis", pressure_stats))
+        
+        stats_widget.setLayout(stats_layout)
+        self.charts_layout.addWidget(stats_widget)
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Chemical Equipment Visualizer - Desktop")
-        self.setGeometry(100, 100, 1200, 800)
+        self.setWindowTitle("🧪 Chemora - Desktop Analytics Platform")
+        self.setGeometry(100, 100, 1400, 900)
+        
+        # Modern styling
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: #f8f9fa;
+            }
+            QGroupBox {
+                font-weight: bold;
+                border: 2px solid #dee2e6;
+                border-radius: 8px;
+                margin: 5px;
+                padding-top: 10px;
+                background-color: white;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 8px 0 8px;
+                color: #495057;
+            }
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #4facfe, stop:1 #00f2fe);
+                color: white;
+                border: none;
+                padding: 10px 16px;
+                border-radius: 6px;
+                font-weight: bold;
+                font-size: 13px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #43a3f5, stop:1 #00d9fe);
+            }
+            QPushButton:disabled {
+                background-color: #6c757d;
+                color: #adb5bd;
+            }
+            QListWidget {
+                border: 1px solid #dee2e6;
+                border-radius: 6px;
+                background-color: white;
+                selection-background-color: #e3f2fd;
+            }
+            QListWidget::item {
+                padding: 12px;
+                border-bottom: 1px solid #f1f3f4;
+            }
+            QListWidget::item:selected {
+                background-color: #e3f2fd;
+                color: #1976d2;
+            }
+            QTableWidget {
+                gridline-color: #dee2e6;
+                background-color: white;
+                alternate-background-color: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 6px;
+            }
+            QTabWidget::pane {
+                border: 1px solid #dee2e6;
+                border-radius: 6px;
+                background-color: white;
+            }
+            QTabBar::tab {
+                background: #e9ecef;
+                color: #495057;
+                padding: 12px 20px;
+                margin-right: 2px;
+                border-top-left-radius: 6px;
+                border-top-right-radius: 6px;
+            }
+            QTabBar::tab:selected {
+                background: white;
+                color: #007bff;
+                border-bottom: 2px solid #007bff;
+            }
+            QStatusBar {
+                background-color: #343a40;
+                color: white;
+                border: none;
+            }
+        """)
         
         self.api_base = "http://localhost:8000/api"
         self.auth_header = None
@@ -328,13 +489,28 @@ class MainWindow(QMainWindow):
         self.data_table = QTableWidget()
         self.tab_widget.addTab(self.data_table, "📋 Data Table")
         
-        self.chart_widget = TextChartsWidget()
+        self.chart_widget = ChartsWidget()
         self.tab_widget.addTab(self.chart_widget, "📊 Charts & Analysis")
         
-        self.pdf_btn = QPushButton("📄 Download PDF Report")
+        self.pdf_btn = QPushButton("📄 Generate PDF Report")
         self.pdf_btn.clicked.connect(self.download_pdf)
         self.pdf_btn.setEnabled(False)
-        self.pdf_btn.setStyleSheet("QPushButton { background-color: #28a745; color: white; padding: 10px; font-weight: bold; }")
+        self.pdf_btn.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #dc3545, stop:1 #fd7e14);
+                padding: 12px;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #c82333, stop:1 #e8650e);
+            }
+            QPushButton:disabled {
+                background-color: #6c757d;
+                color: #adb5bd;
+            }
+        """)
         
         right_layout.addWidget(self.summary_label)
         right_layout.addWidget(self.tab_widget)
