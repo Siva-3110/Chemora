@@ -97,6 +97,8 @@ class ChartsWidget(QWidget):
     
     def init_ui(self):
         layout = QVBoxLayout()
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
         
         # Create scroll area for charts
         scroll = QScrollArea()
@@ -104,12 +106,27 @@ class ChartsWidget(QWidget):
         scroll.setStyleSheet("""
             QScrollArea {
                 border: none;
-                background-color: #f8f9fa;
+                background-color: #f1f3f4;
+            }
+            QScrollBar:vertical {
+                background-color: #e9ecef;
+                width: 12px;
+                border-radius: 6px;
+            }
+            QScrollBar::handle:vertical {
+                background-color: #6c757d;
+                border-radius: 6px;
+                min-height: 20px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background-color: #495057;
             }
         """)
         
         self.charts_widget = QWidget()
         self.charts_layout = QVBoxLayout()
+        self.charts_layout.setSpacing(25)
+        self.charts_layout.setContentsMargins(15, 15, 15, 15)
         self.charts_widget.setLayout(self.charts_layout)
         
         scroll.setWidget(self.charts_widget)
@@ -119,53 +136,54 @@ class ChartsWidget(QWidget):
     
     def create_matplotlib_chart(self, chart_type, title, data, labels=None, colors=None):
         """Create matplotlib chart widget"""
-        fig = Figure(figsize=(10, 6), dpi=100)
+        fig = Figure(figsize=(12, 7), dpi=100)
         fig.patch.set_facecolor('white')
         
         ax = fig.add_subplot(111)
         
         if chart_type == 'bar':
             bars = ax.bar(labels, data, color=colors or ['#4facfe', '#00f2fe', '#43a3f5'])
-            ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
-            ax.set_ylabel('Values', fontsize=12)
+            ax.set_title(title, fontsize=18, fontweight='bold', pad=30)
+            ax.set_ylabel('Values', fontsize=14)
             
             # Add value labels on bars
             for bar, value in zip(bars, data):
                 height = bar.get_height()
                 ax.text(bar.get_x() + bar.get_width()/2., height + max(data)*0.01,
-                       f'{value:.2f}', ha='center', va='bottom', fontweight='bold')
+                       f'{value:.2f}', ha='center', va='bottom', fontweight='bold', fontsize=12)
         
         elif chart_type == 'pie':
             colors = colors or ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
             wedges, texts, autotexts = ax.pie(data, labels=labels, colors=colors, autopct='%1.1f%%',
-                                            startangle=90, textprops={'fontsize': 10})
-            ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
+                                            startangle=90, textprops={'fontsize': 12})
+            ax.set_title(title, fontsize=18, fontweight='bold', pad=30)
             
             # Make percentage text bold
             for autotext in autotexts:
                 autotext.set_color('white')
                 autotext.set_fontweight('bold')
+                autotext.set_fontsize(11)
         
         elif chart_type == 'scatter':
             x_data, y_data = data
-            scatter = ax.scatter(x_data, y_data, c='#4facfe', alpha=0.7, s=60, edgecolors='white', linewidth=1)
-            ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
-            ax.set_xlabel(labels[0] if labels else 'X', fontsize=12)
-            ax.set_ylabel(labels[1] if labels else 'Y', fontsize=12)
+            scatter = ax.scatter(x_data, y_data, c='#4facfe', alpha=0.7, s=80, edgecolors='white', linewidth=2)
+            ax.set_title(title, fontsize=18, fontweight='bold', pad=30)
+            ax.set_xlabel(labels[0] if labels else 'X', fontsize=14)
+            ax.set_ylabel(labels[1] if labels else 'Y', fontsize=14)
             ax.grid(True, alpha=0.3)
             
             # Add trend line
             if len(x_data) > 1:
                 z = np.polyfit(x_data, y_data, 1)
                 p = np.poly1d(z)
-                ax.plot(x_data, p(x_data), "--", color='#ff6b6b', alpha=0.8, linewidth=2)
+                ax.plot(x_data, p(x_data), "--", color='#ff6b6b', alpha=0.8, linewidth=3)
         
         elif chart_type == 'line':
-            ax.plot(range(len(data)), data, marker='o', linewidth=3, markersize=8, 
+            ax.plot(range(len(data)), data, marker='o', linewidth=4, markersize=10, 
                    color='#4facfe', markerfacecolor='#00f2fe', markeredgecolor='white', markeredgewidth=2)
-            ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
-            ax.set_xlabel('Equipment Index', fontsize=12)
-            ax.set_ylabel('Temperature (°C)', fontsize=12)
+            ax.set_title(title, fontsize=18, fontweight='bold', pad=30)
+            ax.set_xlabel('Equipment Index', fontsize=14)
+            ax.set_ylabel('Temperature (°C)', fontsize=14)
             ax.grid(True, alpha=0.3)
             ax.fill_between(range(len(data)), data, alpha=0.3, color='#4facfe')
         
@@ -174,14 +192,29 @@ class ChartsWidget(QWidget):
         ax.spines['right'].set_visible(False)
         ax.spines['left'].set_color('#ddd')
         ax.spines['bottom'].set_color('#ddd')
-        ax.tick_params(colors='#666')
+        ax.tick_params(colors='#666', labelsize=11)
         
-        fig.tight_layout()
+        fig.tight_layout(pad=3.0)
         
         canvas = FigureCanvas(fig)
-        canvas.setMinimumHeight(400)
+        canvas.setMinimumHeight(450)
         
-        return canvas
+        # Add spacing wrapper
+        wrapper = QWidget()
+        wrapper_layout = QVBoxLayout()
+        wrapper_layout.setContentsMargins(20, 20, 20, 30)
+        wrapper_layout.addWidget(canvas)
+        wrapper.setLayout(wrapper_layout)
+        wrapper.setStyleSheet("""
+            QWidget {
+                background-color: white;
+                border: 1px solid #e9ecef;
+                border-radius: 12px;
+                margin: 15px 5px;
+            }
+        """)
+        
+        return wrapper
     
     def create_stats_card(self, title, stats_data):
         """Create a statistics card widget"""
@@ -190,31 +223,40 @@ class ChartsWidget(QWidget):
             QGroupBox {
                 background-color: white;
                 border: 2px solid #e9ecef;
-                border-radius: 12px;
-                margin: 10px;
-                padding: 20px;
+                border-radius: 15px;
+                margin: 15px 10px;
+                padding: 25px;
+                font-size: 14px;
             }
         """)
         
         layout = QVBoxLayout()
+        layout.setSpacing(15)
         
         title_label = QLabel(title)
         title_label.setStyleSheet("""
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                stop:0 #667eea, stop:1 #764ba2);
+            color: white;
+            border-radius: 8px;
         """)
+        title_label.setAlignment(Qt.AlignCenter)
         
         stats_text = "\n".join([f"{key}: {value}" for key, value in stats_data.items()])
         stats_label = QLabel(stats_text)
         stats_label.setStyleSheet("""
-            font-size: 14px;
+            font-size: 15px;
             color: #34495e;
-            line-height: 1.6;
+            line-height: 2.0;
             background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
         """)
         
         layout.addWidget(title_label)
@@ -298,15 +340,24 @@ class ChartsWidget(QWidget):
             f"📉 Pressure Range": f"{max(pressures) - min(pressures):.2f}"
         }
         
-        # Create horizontal layout for stats cards
+        # Create horizontal layout for stats cards with proper spacing
         stats_widget = QWidget()
         stats_layout = QHBoxLayout()
+        stats_layout.setSpacing(20)
+        stats_layout.setContentsMargins(10, 30, 10, 30)
         
         stats_layout.addWidget(self.create_stats_card("🌡️ Temperature Analysis", temp_stats))
         stats_layout.addWidget(self.create_stats_card("💧 Flowrate Analysis", flow_stats))
         stats_layout.addWidget(self.create_stats_card("⚙️ Pressure Analysis", pressure_stats))
         
         stats_widget.setLayout(stats_layout)
+        stats_widget.setStyleSheet("""
+            QWidget {
+                background-color: #f8f9fa;
+                border-radius: 15px;
+                margin: 20px 5px;
+            }
+        """)
         self.charts_layout.addWidget(stats_widget)
 
 class MainWindow(QMainWindow):
