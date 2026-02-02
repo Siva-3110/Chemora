@@ -13,182 +13,58 @@ class SignupDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Chemora - Create Account")
-        self.setFixedSize(600, 750)  # Increased size significantly
-        self.setStyleSheet("""
-            QDialog {
-                background-color: white;
-            }
-            QLabel {
-                color: #000000;
-                font-family: 'Segoe UI', Arial, sans-serif;
-                font-weight: bold;
-                font-size: 14px;
-            }
-            QLineEdit {
-                padding: 15px;
-                border: 3px solid #007bff;
-                border-radius: 8px;
-                background-color: white;
-                font-size: 14px;
-                color: #000000;
-                font-weight: bold;
-                min-height: 20px;  /* Ensure minimum height */
-            }
-            QLineEdit:focus {
-                border: 3px solid #0056b3;
-                background-color: #f0f8ff;
-            }
-            QPushButton {
-                background: #28a745;
-                color: white;
-                border: none;
-                padding: 15px 25px;
-                border-radius: 8px;
-                font-weight: bold;
-                font-size: 14px;
-                min-height: 25px;  /* Ensure minimum height */
-            }
-            QPushButton:hover {
-                background: #1e7e34;
-            }
-            QPushButton#cancelBtn {
-                background: #6c757d;
-            }
-            QPushButton#cancelBtn:hover {
-                background: #495057;
-            }
-        """)
+        self.setFixedSize(280, 280)
         
         layout = QVBoxLayout()
-        layout.setSpacing(25)  # Increased spacing
-        layout.setContentsMargins(50, 40, 50, 40)  # Increased margins
+        layout.setSpacing(3)
+        layout.setContentsMargins(10, 10, 10, 10)
         
-        # Title with maximum visibility
-        title = QLabel("📝 Create Chemora Account")
+        # Simple title
+        title = QLabel("Create Account")
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("""
-            font-size: 30px; 
-            font-weight: bold; 
-            margin: 15px; 
-            color: #000000;
-            background-color: #f8f9fa;
-            padding: 30px;
-            border-radius: 15px;
-            min-height: 50px;
-            border: 4px solid #28a745;
-        """)
+        title.setStyleSheet("font-size: 12px; font-weight: bold;")
         
-        subtitle = QLabel("Join the chemical analytics platform")
-        subtitle.setAlignment(Qt.AlignCenter)
-        subtitle.setStyleSheet("""
-            font-size: 15px; 
-            color: #000000; 
-            margin-bottom: 25px; 
-            font-weight: bold;
-            background-color: #f8f9fa;
-            padding: 12px;
-            border-radius: 8px;
-            min-height: 20px;
-        """)
+        # Form fields
+        self.first_name = QLineEdit()
+        self.first_name.setPlaceholderText("First Name")
         
-        # Form fields with proper sizing
-        fields = [
-            ("First Name:", "first_name", "Enter your first name"),
-            ("Last Name:", "last_name", "Enter your last name"),
-            ("Username:", "username", "Choose a username"),
-            ("Email:", "email", "Enter your email address"),
-            ("Password:", "password", "Create a password (min 6 characters)"),
-            ("Confirm Password:", "confirm_password", "Confirm your password")
-        ]
+        self.last_name = QLineEdit()
+        self.last_name.setPlaceholderText("Last Name")
         
-        layout.addWidget(title)
-        layout.addWidget(subtitle)
+        self.username = QLineEdit()
+        self.username.setPlaceholderText("Username")
         
-        for label_text, field_name, placeholder in fields:
-            label = QLabel(label_text)
-            label.setStyleSheet("""
-                font-size: 15px; 
-                color: #000000; 
-                margin-bottom: 8px; 
-                margin-top: 10px;
-                font-weight: bold;
-                background-color: #e9ecef;
-                padding: 10px;
-                border-radius: 5px;
-                min-height: 15px;
-            """)
-            layout.addWidget(label)
-            
-            field = QLineEdit()
-            field.setPlaceholderText(placeholder)
-            field.setMinimumHeight(50)  # Set minimum height for all fields
-            field.setStyleSheet("""
-                QLineEdit {
-                    padding: 15px;
-                    border: 3px solid #007bff;
-                    border-radius: 8px;
-                    background-color: white;
-                    font-size: 14px;
-                    color: #000000;
-                    font-weight: bold;
-                    min-height: 20px;
-                }
-                QLineEdit::placeholder {
-                    color: #6c757d;
-                    font-weight: normal;
-                }
-            """)
-            if "password" in field_name.lower():
-                field.setEchoMode(QLineEdit.Password)
-            setattr(self, field_name, field)
-            layout.addWidget(field)
+        self.email = QLineEdit()
+        self.email.setPlaceholderText("Email")
         
-        # Buttons with proper sizing
+        self.password = QLineEdit()
+        self.password.setPlaceholderText("Password")
+        self.password.setEchoMode(QLineEdit.Password)
+        
+        self.confirm_password = QLineEdit()
+        self.confirm_password.setPlaceholderText("Confirm Password")
+        self.confirm_password.setEchoMode(QLineEdit.Password)
+        
+        # Buttons
         button_layout = QHBoxLayout()
-        button_layout.setSpacing(25)  # Increased spacing
+        button_layout.setSpacing(3)
         
-        cancel_btn = QPushButton("❌ Cancel")
-        cancel_btn.setObjectName("cancelBtn")
+        cancel_btn = QPushButton("Cancel")
         cancel_btn.clicked.connect(self.reject)
-        cancel_btn.setMinimumHeight(50)  # Set minimum height
-        cancel_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #dc3545;
-                color: white;
-                border: none;
-                padding: 15px 25px;
-                border-radius: 8px;
-                font-weight: bold;
-                font-size: 14px;
-                min-height: 25px;
-            }
-            QPushButton:hover {
-                background-color: #c82333;
-            }
-        """)
         
-        create_btn = QPushButton("✨ Create Account")
+        create_btn = QPushButton("Create")
         create_btn.clicked.connect(self.create_account)
-        create_btn.setMinimumHeight(50)  # Set minimum height
-        create_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #28a745;
-                color: white;
-                border: none;
-                padding: 15px 25px;
-                border-radius: 8px;
-                font-weight: bold;
-                font-size: 14px;
-                min-height: 25px;
-            }
-            QPushButton:hover {
-                background-color: #1e7e34;
-            }
-        """)
         
         button_layout.addWidget(cancel_btn)
         button_layout.addWidget(create_btn)
         
+        layout.addWidget(title)
+        layout.addWidget(self.first_name)
+        layout.addWidget(self.last_name)
+        layout.addWidget(self.username)
+        layout.addWidget(self.email)
+        layout.addWidget(self.password)
+        layout.addWidget(self.confirm_password)
         layout.addLayout(button_layout)
         
         self.setLayout(layout)
@@ -234,161 +110,43 @@ class SignupDialog(QDialog):
 class LoginDialog(QDialog):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Chemora - Desktop Login")
-        self.setFixedSize(550, 500)  # Increased size
-        self.setStyleSheet("""
-            QDialog {
-                background-color: white;
-            }
-            QLabel {
-                color: #000000;
-                font-family: 'Segoe UI', Arial, sans-serif;
-                font-weight: bold;
-                font-size: 14px;
-            }
-            QLineEdit {
-                padding: 15px;
-                border: 3px solid #007bff;
-                border-radius: 10px;
-                background-color: white;
-                font-size: 14px;
-                color: #000000;
-                font-weight: bold;
-                min-height: 20px;  /* Ensure minimum height */
-            }
-            QLineEdit:focus {
-                border: 3px solid #0056b3;
-                background-color: #f0f8ff;
-            }
-            QPushButton {
-                background-color: #007bff;
-                color: white;
-                border: none;
-                padding: 15px 24px;
-                border-radius: 10px;
-                font-weight: bold;
-                font-size: 14px;
-                min-height: 25px;  /* Ensure minimum height */
-            }
-            QPushButton:hover {
-                background-color: #0056b3;
-            }
-        """)
+        self.setWindowTitle("Chemora - Login")
+        self.setFixedSize(350, 250)
         
         layout = QVBoxLayout()
-        layout.setSpacing(25)  # Increased spacing
-        layout.setContentsMargins(50, 40, 50, 40)  # Increased margins
+        layout.setSpacing(10)
+        layout.setContentsMargins(20, 20, 20, 20)
         
-        # Logo and title with maximum visibility
-        title = QLabel("🧪 Chemora Desktop")
+        # Simple title
+        title = QLabel("Chemora Desktop")
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("""
-            font-size: 32px; 
-            font-weight: bold; 
-            margin: 15px; 
-            color: #000000;
-            background-color: #f8f9fa;
-            padding: 30px;
-            border-radius: 15px;
-            min-height: 50px;
-            border: 4px solid #007bff;
-        """)
+        title.setStyleSheet("font-size: 18px; font-weight: bold;")
         
-        subtitle = QLabel("Chemical Equipment Analytics Platform")
-        subtitle.setAlignment(Qt.AlignCenter)
-        subtitle.setStyleSheet("""
-            font-size: 15px; 
-            color: #000000; 
-            margin-bottom: 25px; 
-            font-weight: bold;
-            background-color: #f8f9fa;
-            padding: 12px;
-            border-radius: 8px;
-            min-height: 20px;
-        """)
-        
-        # Input fields with proper sizing
+        # Username
         username_label = QLabel("Username:")
-        username_label.setStyleSheet("""
-            font-size: 15px; 
-            color: #000000; 
-            margin-bottom: 8px;
-            font-weight: bold;
-            background-color: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            min-height: 15px;
-        """)
-        
         self.username_input = QLineEdit()
-        self.username_input.setPlaceholderText("Enter username (demo: admin)")
-        self.username_input.setMinimumHeight(50)  # Set minimum height
+        self.username_input.setPlaceholderText("admin")
         
+        # Password
         password_label = QLabel("Password:")
-        password_label.setStyleSheet("""
-            font-size: 15px; 
-            color: #000000; 
-            margin-bottom: 8px; 
-            margin-top: 15px;
-            font-weight: bold;
-            background-color: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            min-height: 15px;
-        """)
-        
         self.password_input = QLineEdit()
-        self.password_input.setPlaceholderText("Enter password (demo: admin)")
+        self.password_input.setPlaceholderText("admin")
         self.password_input.setEchoMode(QLineEdit.Password)
-        self.password_input.setMinimumHeight(50)  # Set minimum height
         
-        # Buttons with proper sizing
-        login_btn = QPushButton("🚀 Sign In")
+        # Buttons
+        login_btn = QPushButton("Login")
         login_btn.clicked.connect(self.accept)
-        login_btn.setMinimumHeight(50)  # Set minimum height
         
-        signup_btn = QPushButton("📝 Create Account")
-        signup_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #28a745;
-                color: white;
-                border: none;
-                padding: 15px 24px;
-                border-radius: 10px;
-                font-weight: bold;
-                font-size: 14px;
-                min-height: 25px;
-            }
-            QPushButton:hover {
-                background-color: #1e7e34;
-            }
-        """)
+        signup_btn = QPushButton("Create Account")
         signup_btn.clicked.connect(self.show_signup)
-        signup_btn.setMinimumHeight(50)  # Set minimum height
-        
-        demo_label = QLabel("💡 Demo Credentials: admin / admin")
-        demo_label.setAlignment(Qt.AlignCenter)
-        demo_label.setStyleSheet("""
-            font-size: 13px; 
-            color: #000000; 
-            margin-top: 20px; 
-            font-weight: bold;
-            background-color: #fff3cd;
-            padding: 15px;
-            border-radius: 8px;
-            border: 2px solid #ffeaa7;
-            min-height: 20px;
-        """)
         
         layout.addWidget(title)
-        layout.addWidget(subtitle)
         layout.addWidget(username_label)
         layout.addWidget(self.username_input)
         layout.addWidget(password_label)
         layout.addWidget(self.password_input)
         layout.addWidget(login_btn)
         layout.addWidget(signup_btn)
-        layout.addWidget(demo_label)
         
         self.setLayout(layout)
     
@@ -519,8 +277,7 @@ class ChartsWidget(QWidget):
         wrapper.setStyleSheet("""
             QWidget {
                 background-color: white;
-                border: 1px solid #e9ecef;
-                border-radius: 12px;
+                border: none;
                 margin: 15px 5px;
             }
         """)
@@ -533,8 +290,7 @@ class ChartsWidget(QWidget):
         card.setStyleSheet("""
             QGroupBox {
                 background-color: white;
-                border: 2px solid #e9ecef;
-                border-radius: 15px;
+                border: none;
                 margin: 15px 10px;
                 padding: 25px;
                 font-size: 14px;
@@ -566,8 +322,7 @@ class ChartsWidget(QWidget):
             line-height: 2.0;
             background-color: #f8f9fa;
             padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #dee2e6;
+            border: none;
         """)
         
         layout.addWidget(title_label)
@@ -601,7 +356,7 @@ class ChartsWidget(QWidget):
         avg_values = [summary['avg_flowrate'], summary['avg_pressure'], summary['avg_temperature']]
         avg_colors = ['#4facfe', '#00f2fe', '#43a3f5']
         
-        avg_chart = self.create_matplotlib_chart('bar', '📈 Average Equipment Parameters', 
+        avg_chart = self.create_matplotlib_chart('bar', 'Average Equipment Parameters', 
                                                 avg_values, avg_labels, avg_colors)
         self.charts_layout.addWidget(avg_chart)
         
@@ -610,7 +365,7 @@ class ChartsWidget(QWidget):
             type_labels = list(summary['type_distribution'].keys())
             type_values = list(summary['type_distribution'].values())
             
-            pie_chart = self.create_matplotlib_chart('pie', '🏢 Equipment Type Distribution', 
+            pie_chart = self.create_matplotlib_chart('pie', 'Equipment Type Distribution', 
                                                     type_values, type_labels)
             self.charts_layout.addWidget(pie_chart)
         
@@ -618,13 +373,13 @@ class ChartsWidget(QWidget):
         flowrates = [item['flowrate'] for item in data]
         pressures = [item['pressure'] for item in data]
         
-        scatter_chart = self.create_matplotlib_chart('scatter', '🔄 Flowrate vs Pressure Correlation', 
+        scatter_chart = self.create_matplotlib_chart('scatter', 'Flowrate vs Pressure Correlation', 
                                                     (flowrates, pressures), ['Flowrate', 'Pressure'])
         self.charts_layout.addWidget(scatter_chart)
         
         # 4. Temperature Trend Line Chart
         temperatures = [item['temperature'] for item in data]
-        temp_chart = self.create_matplotlib_chart('line', '🌡️ Temperature Distribution Across Equipment', 
+        temp_chart = self.create_matplotlib_chart('line', 'Temperature Distribution Across Equipment', 
                                                  temperatures)
         self.charts_layout.addWidget(temp_chart)
         
@@ -657,15 +412,15 @@ class ChartsWidget(QWidget):
         stats_layout.setSpacing(20)
         stats_layout.setContentsMargins(10, 30, 10, 30)
         
-        stats_layout.addWidget(self.create_stats_card("🌡️ Temperature Analysis", temp_stats))
-        stats_layout.addWidget(self.create_stats_card("💧 Flowrate Analysis", flow_stats))
-        stats_layout.addWidget(self.create_stats_card("⚙️ Pressure Analysis", pressure_stats))
+        stats_layout.addWidget(self.create_stats_card("Temperature Analysis", temp_stats))
+        stats_layout.addWidget(self.create_stats_card("Flowrate Analysis", flow_stats))
+        stats_layout.addWidget(self.create_stats_card("Pressure Analysis", pressure_stats))
         
         stats_widget.setLayout(stats_layout)
         stats_widget.setStyleSheet("""
             QWidget {
                 background-color: #f8f9fa;
-                border-radius: 15px;
+                border: none;
                 margin: 20px 5px;
             }
         """)
