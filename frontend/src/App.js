@@ -22,15 +22,39 @@ function App() {
     const auth = localStorage.getItem('auth');
     if (auth) {
       const parsed = JSON.parse(auth);
-      setUser({ username: parsed.username });
-      setIsAuthenticated(true);
-      axios.defaults.headers.common['Authorization'] = `Basic ${btoa(`${parsed.username}:${parsed.password}`)}`;
+      
+      // Check if user exists in local storage or is demo user
+      const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+      const localUser = users.find(user => user.username === parsed.username);
+      
+      if (localUser || parsed.username === 'admin') {
+        setUser({ username: parsed.username });
+        setIsAuthenticated(true);
+        if (parsed.username === 'admin') {
+          axios.defaults.headers.common['Authorization'] = `Basic ${btoa(`${parsed.username}:${parsed.password}`)}`;
+        }
+      }
     }
     setLoading(false);
   };
 
   const handleLogin = async (credentials) => {
     try {
+      // First check locally registered users
+      const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+      const localUser = users.find(user => 
+        user.username === credentials.username && user.password === credentials.password
+      );
+      
+      if (localUser) {
+        localStorage.setItem('auth', JSON.stringify(credentials));
+        setUser({ username: credentials.username });
+        setIsAuthenticated(true);
+        setCurrentPage('dashboard');
+        return { success: true };
+      }
+      
+      // Then try demo credentials and API authentication
       const auth = btoa(`${credentials.username}:${credentials.password}`);
       axios.defaults.headers.common['Authorization'] = `Basic ${auth}`;
       

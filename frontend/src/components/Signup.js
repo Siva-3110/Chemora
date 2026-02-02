@@ -32,6 +32,28 @@ function Signup({ onNavigate }) {
       return;
     }
 
+    // Store user credentials locally
+    const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    
+    // Check if username already exists
+    if (users.find(user => user.username === formData.username)) {
+      setError('Username already exists');
+      setLoading(false);
+      return;
+    }
+
+    // Add new user
+    const newUser = {
+      username: formData.username,
+      password: formData.password,
+      email: formData.email,
+      firstName: formData.firstName,
+      lastName: formData.lastName
+    };
+    
+    users.push(newUser);
+    localStorage.setItem('registeredUsers', JSON.stringify(users));
+
     setTimeout(() => {
       setSuccess(true);
       setLoading(false);
