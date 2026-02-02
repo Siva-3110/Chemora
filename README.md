@@ -20,7 +20,7 @@ Users can upload CSV datasets to generate instant analytics, interactive charts,
 
 ## 🚀 Live Demos
 - **Web App (Render)**: https://chemora-1.onrender.com/
-- **Desktop App**: Download `main.exe` from [GitHub Releases](https://github.com/Siva-3110/Chemora/desktop/dist) 
+- **Desktop App**: Download `main.exe` from [GitHub Releases](https://github.com/Siva-3110/Chemora/tree/master/desktop/dist) 
 
 
 ## 🔐 Demo Credentials
