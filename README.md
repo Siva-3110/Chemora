@@ -20,7 +20,7 @@ Users can upload CSV datasets to generate instant analytics, interactive charts,
 
 ## 🚀 Live Demos
 - **Web App (Render)**: https://chemora-1.onrender.com/
-- **Desktop App**: Download `main.exe` from [GitHub Releases](https://github.com/Siva-3110/Chemora/releases)
+- **Desktop App**: Download `main.exe` from [GitHub Releases](https://github.com/Siva-3110/Chemora/desktop/dist) 
 
 
 ## 🔐 Demo Credentials
@@ -201,6 +201,4 @@ Pump-2,Pump,98.45,108.30,165.20
 
 ## 📝 Submission Details
 - **Repository**: [GitHub - Chemora](https://github.com/Siva-3110/Chemora)
-- **Live Web Demo**: Available at deployed Netlify URL
-- **Desktop App**: Downloadable executable in releases
-- **Technologies**: Django REST Framework, React.js, PyQt5, Chart.js, Matplotlib
+- **Demo Video**: [Demo Video]()
