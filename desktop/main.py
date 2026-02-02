@@ -13,114 +13,182 @@ class SignupDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Chemora - Create Account")
-        self.setFixedSize(500, 650)
+        self.setFixedSize(600, 750)  # Increased size significantly
         self.setStyleSheet("""
             QDialog {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
-                    stop:0 #f8f9fa, stop:1 #e9ecef);
+                background-color: white;
             }
             QLabel {
-                color: #2c3e50;
+                color: #000000;
                 font-family: 'Segoe UI', Arial, sans-serif;
                 font-weight: bold;
+                font-size: 14px;
             }
             QLineEdit {
-                padding: 12px;
-                border: 2px solid #dee2e6;
+                padding: 15px;
+                border: 3px solid #007bff;
                 border-radius: 8px;
-                background: white;
-                font-size: 13px;
-                color: #2c3e50;
-                font-weight: normal;
+                background-color: white;
+                font-size: 14px;
+                color: #000000;
+                font-weight: bold;
+                min-height: 20px;  /* Ensure minimum height */
             }
             QLineEdit:focus {
-                border: 2px solid #007bff;
-                background: #f8f9ff;
+                border: 3px solid #0056b3;
+                background-color: #f0f8ff;
             }
             QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #28a745, stop:1 #1e7e34);
+                background: #28a745;
                 color: white;
                 border: none;
-                padding: 12px 20px;
+                padding: 15px 25px;
                 border-radius: 8px;
                 font-weight: bold;
-                font-size: 13px;
+                font-size: 14px;
+                min-height: 25px;  /* Ensure minimum height */
             }
             QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #1e7e34, stop:1 #155724);
+                background: #1e7e34;
             }
             QPushButton#cancelBtn {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #6c757d, stop:1 #495057);
+                background: #6c757d;
             }
             QPushButton#cancelBtn:hover {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #495057, stop:1 #343a40);
+                background: #495057;
             }
         """)
         
         layout = QVBoxLayout()
-        layout.setSpacing(15)
-        layout.setContentsMargins(40, 30, 40, 30)
+        layout.setSpacing(25)  # Increased spacing
+        layout.setContentsMargins(50, 40, 50, 40)  # Increased margins
         
-        # Title with better visibility
+        # Title with maximum visibility
         title = QLabel("📝 Create Chemora Account")
         title.setAlignment(Qt.AlignCenter)
         title.setStyleSheet("""
-            font-size: 24px; 
+            font-size: 30px; 
             font-weight: bold; 
             margin: 15px; 
-            color: white;
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                stop:0 #28a745, stop:1 #1e7e34);
-            padding: 15px;
-            border-radius: 12px;
+            color: #000000;
+            background-color: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            min-height: 50px;
+            border: 4px solid #28a745;
         """)
         
         subtitle = QLabel("Join the chemical analytics platform")
         subtitle.setAlignment(Qt.AlignCenter)
-        subtitle.setStyleSheet("font-size: 14px; color: #6c757d; margin-bottom: 20px; font-weight: normal;")
+        subtitle.setStyleSheet("""
+            font-size: 15px; 
+            color: #000000; 
+            margin-bottom: 25px; 
+            font-weight: bold;
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            min-height: 20px;
+        """)
         
-        # Form fields with clear labels
+        # Form fields with proper sizing
         fields = [
-            ("First Name:", "first_name", "First Name"),
-            ("Last Name:", "last_name", "Last Name"),
-            ("Username:", "username", "Username"),
-            ("Email:", "email", "Email Address"),
-            ("Password:", "password", "Password (min 6 characters)"),
-            ("Confirm Password:", "confirm_password", "Confirm Password")
+            ("First Name:", "first_name", "Enter your first name"),
+            ("Last Name:", "last_name", "Enter your last name"),
+            ("Username:", "username", "Choose a username"),
+            ("Email:", "email", "Enter your email address"),
+            ("Password:", "password", "Create a password (min 6 characters)"),
+            ("Confirm Password:", "confirm_password", "Confirm your password")
         ]
+        
+        layout.addWidget(title)
+        layout.addWidget(subtitle)
         
         for label_text, field_name, placeholder in fields:
             label = QLabel(label_text)
-            label.setStyleSheet("font-size: 14px; color: #2c3e50; margin-bottom: 3px; margin-top: 5px;")
+            label.setStyleSheet("""
+                font-size: 15px; 
+                color: #000000; 
+                margin-bottom: 8px; 
+                margin-top: 10px;
+                font-weight: bold;
+                background-color: #e9ecef;
+                padding: 10px;
+                border-radius: 5px;
+                min-height: 15px;
+            """)
             layout.addWidget(label)
             
             field = QLineEdit()
             field.setPlaceholderText(placeholder)
+            field.setMinimumHeight(50)  # Set minimum height for all fields
+            field.setStyleSheet("""
+                QLineEdit {
+                    padding: 15px;
+                    border: 3px solid #007bff;
+                    border-radius: 8px;
+                    background-color: white;
+                    font-size: 14px;
+                    color: #000000;
+                    font-weight: bold;
+                    min-height: 20px;
+                }
+                QLineEdit::placeholder {
+                    color: #6c757d;
+                    font-weight: normal;
+                }
+            """)
             if "password" in field_name.lower():
                 field.setEchoMode(QLineEdit.Password)
             setattr(self, field_name, field)
             layout.addWidget(field)
         
-        # Buttons with better spacing
+        # Buttons with proper sizing
         button_layout = QHBoxLayout()
-        button_layout.setSpacing(15)
+        button_layout.setSpacing(25)  # Increased spacing
         
         cancel_btn = QPushButton("❌ Cancel")
         cancel_btn.setObjectName("cancelBtn")
         cancel_btn.clicked.connect(self.reject)
+        cancel_btn.setMinimumHeight(50)  # Set minimum height
+        cancel_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #dc3545;
+                color: white;
+                border: none;
+                padding: 15px 25px;
+                border-radius: 8px;
+                font-weight: bold;
+                font-size: 14px;
+                min-height: 25px;
+            }
+            QPushButton:hover {
+                background-color: #c82333;
+            }
+        """)
         
         create_btn = QPushButton("✨ Create Account")
         create_btn.clicked.connect(self.create_account)
+        create_btn.setMinimumHeight(50)  # Set minimum height
+        create_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #28a745;
+                color: white;
+                border: none;
+                padding: 15px 25px;
+                border-radius: 8px;
+                font-weight: bold;
+                font-size: 14px;
+                min-height: 25px;
+            }
+            QPushButton:hover {
+                background-color: #1e7e34;
+            }
+        """)
         
         button_layout.addWidget(cancel_btn)
         button_layout.addWidget(create_btn)
         
-        layout.addWidget(title)
-        layout.addWidget(subtitle)
         layout.addLayout(button_layout)
         
         self.setLayout(layout)
@@ -167,120 +235,149 @@ class LoginDialog(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Chemora - Desktop Login")
-        self.setFixedSize(450, 400)
+        self.setFixedSize(550, 500)  # Increased size
         self.setStyleSheet("""
             QDialog {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
-                    stop:0 #f8f9fa, stop:1 #e9ecef);
+                background-color: white;
             }
             QLabel {
-                color: #2c3e50;
+                color: #000000;
                 font-family: 'Segoe UI', Arial, sans-serif;
                 font-weight: bold;
+                font-size: 14px;
             }
             QLineEdit {
                 padding: 15px;
-                border: 2px solid #dee2e6;
+                border: 3px solid #007bff;
                 border-radius: 10px;
-                background: white;
+                background-color: white;
                 font-size: 14px;
-                color: #2c3e50;
-                font-weight: normal;
+                color: #000000;
+                font-weight: bold;
+                min-height: 20px;  /* Ensure minimum height */
             }
             QLineEdit:focus {
-                border: 2px solid #007bff;
-                background: #f8f9ff;
+                border: 3px solid #0056b3;
+                background-color: #f0f8ff;
             }
             QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #007bff, stop:1 #0056b3);
+                background-color: #007bff;
                 color: white;
                 border: none;
                 padding: 15px 24px;
                 border-radius: 10px;
                 font-weight: bold;
                 font-size: 14px;
+                min-height: 25px;  /* Ensure minimum height */
             }
             QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #0056b3, stop:1 #004085);
-            }
-            QPushButton:pressed {
-                background: #004085;
+                background-color: #0056b3;
             }
         """)
         
         layout = QVBoxLayout()
-        layout.setSpacing(20)
-        layout.setContentsMargins(40, 30, 40, 30)
+        layout.setSpacing(25)  # Increased spacing
+        layout.setContentsMargins(50, 40, 50, 40)  # Increased margins
         
-        # Logo and title with better contrast
+        # Logo and title with maximum visibility
         title = QLabel("🧪 Chemora Desktop")
         title.setAlignment(Qt.AlignCenter)
         title.setStyleSheet("""
-            font-size: 28px; 
+            font-size: 32px; 
             font-weight: bold; 
-            margin: 20px; 
-            color: #2c3e50;
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                stop:0 #667eea, stop:1 #764ba2);
-            color: white;
-            padding: 15px;
-            border-radius: 12px;
+            margin: 15px; 
+            color: #000000;
+            background-color: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            min-height: 50px;
+            border: 4px solid #007bff;
         """)
         
         subtitle = QLabel("Chemical Equipment Analytics Platform")
         subtitle.setAlignment(Qt.AlignCenter)
-        subtitle.setStyleSheet("font-size: 16px; color: #6c757d; margin-bottom: 30px; font-weight: normal;")
+        subtitle.setStyleSheet("""
+            font-size: 15px; 
+            color: #000000; 
+            margin-bottom: 25px; 
+            font-weight: bold;
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            min-height: 20px;
+        """)
         
-        # Input fields with clear labels
+        # Input fields with proper sizing
         username_label = QLabel("Username:")
-        username_label.setStyleSheet("font-size: 15px; color: #2c3e50; margin-bottom: 5px;")
+        username_label.setStyleSheet("""
+            font-size: 15px; 
+            color: #000000; 
+            margin-bottom: 8px;
+            font-weight: bold;
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            min-height: 15px;
+        """)
         
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("Enter username (demo: admin)")
+        self.username_input.setMinimumHeight(50)  # Set minimum height
         
         password_label = QLabel("Password:")
-        password_label.setStyleSheet("font-size: 15px; color: #2c3e50; margin-bottom: 5px; margin-top: 10px;")
+        password_label.setStyleSheet("""
+            font-size: 15px; 
+            color: #000000; 
+            margin-bottom: 8px; 
+            margin-top: 15px;
+            font-weight: bold;
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            min-height: 15px;
+        """)
         
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("Enter password (demo: admin)")
         self.password_input.setEchoMode(QLineEdit.Password)
+        self.password_input.setMinimumHeight(50)  # Set minimum height
         
-        # Buttons with better styling
+        # Buttons with proper sizing
         login_btn = QPushButton("🚀 Sign In")
         login_btn.clicked.connect(self.accept)
+        login_btn.setMinimumHeight(50)  # Set minimum height
         
         signup_btn = QPushButton("📝 Create Account")
         signup_btn.setStyleSheet("""
             QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #28a745, stop:1 #1e7e34);
+                background-color: #28a745;
                 color: white;
                 border: none;
                 padding: 15px 24px;
                 border-radius: 10px;
                 font-weight: bold;
                 font-size: 14px;
+                min-height: 25px;
             }
             QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #1e7e34, stop:1 #155724);
+                background-color: #1e7e34;
             }
         """)
         signup_btn.clicked.connect(self.show_signup)
+        signup_btn.setMinimumHeight(50)  # Set minimum height
         
         demo_label = QLabel("💡 Demo Credentials: admin / admin")
         demo_label.setAlignment(Qt.AlignCenter)
         demo_label.setStyleSheet("""
             font-size: 13px; 
-            color: #6c757d; 
-            margin-top: 15px; 
-            font-weight: normal;
-            background: #fff3cd;
-            padding: 10px;
+            color: #000000; 
+            margin-top: 20px; 
+            font-weight: bold;
+            background-color: #fff3cd;
+            padding: 15px;
             border-radius: 8px;
-            border: 1px solid #ffeaa7;
+            border: 2px solid #ffeaa7;
+            min-height: 20px;
         """)
         
         layout.addWidget(title)
