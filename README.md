@@ -16,7 +16,7 @@ Users can upload CSV datasets to generate instant analytics, interactive charts,
 ## 📸 Screenshots
 | Web Dashboard | Desktop Application |
 |---------------|-------------------|
-| ![Web Dashboard](screenshots/web-dashboard.png) | ![Desktop App](screenshots/desktop-app.png) |
+| ![Web Dashboard](screenshots/webapp.png) | ![Desktop App](screenshots/desktopapp.png) |
 
 ## 🚀 Live Demos
 - **Web App (Render)**: https://chemora-1.onrender.com/
