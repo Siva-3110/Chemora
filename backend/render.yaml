@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: chemora-backend
+    env: python
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
+    startCommand: "python manage.py runserver 0.0.0.0:$PORT"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: equipment_api.settings
+      - key: DEBUG
+        value: "False"
