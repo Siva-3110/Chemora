@@ -13,33 +13,33 @@ class SignupDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Chemora - Create Account")
-        self.setFixedSize(500, 600)
+        self.setFixedSize(500, 650)
         self.setStyleSheet("""
             QDialog {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
-                    stop:0 #2c3e50, stop:1 #34495e);
+                    stop:0 #f8f9fa, stop:1 #e9ecef);
             }
             QLabel {
-                color: white;
+                color: #2c3e50;
                 font-family: 'Segoe UI', Arial, sans-serif;
                 font-weight: bold;
             }
             QLineEdit {
                 padding: 12px;
-                border: 2px solid rgba(255,255,255,0.2);
+                border: 2px solid #dee2e6;
                 border-radius: 8px;
-                background: rgba(255,255,255,0.95);
+                background: white;
                 font-size: 13px;
                 color: #2c3e50;
-                font-weight: bold;
+                font-weight: normal;
             }
             QLineEdit:focus {
-                border: 2px solid #3498db;
-                background: white;
+                border: 2px solid #007bff;
+                background: #f8f9ff;
             }
             QPushButton {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #27ae60, stop:1 #229954);
+                    stop:0 #28a745, stop:1 #1e7e34);
                 color: white;
                 border: none;
                 padding: 12px 20px;
@@ -49,15 +49,15 @@ class SignupDialog(QDialog):
             }
             QPushButton:hover {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #229954, stop:1 #1e8449);
+                    stop:0 #1e7e34, stop:1 #155724);
             }
             QPushButton#cancelBtn {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #95a5a6, stop:1 #7f8c8d);
+                    stop:0 #6c757d, stop:1 #495057);
             }
             QPushButton#cancelBtn:hover {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #7f8c8d, stop:1 #6c7b7d);
+                    stop:0 #495057, stop:1 #343a40);
             }
         """)
         
@@ -65,38 +65,49 @@ class SignupDialog(QDialog):
         layout.setSpacing(15)
         layout.setContentsMargins(40, 30, 40, 30)
         
-        # Title
+        # Title with better visibility
         title = QLabel("📝 Create Chemora Account")
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("font-size: 24px; font-weight: bold; margin: 15px; color: white;")
+        title.setStyleSheet("""
+            font-size: 24px; 
+            font-weight: bold; 
+            margin: 15px; 
+            color: white;
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                stop:0 #28a745, stop:1 #1e7e34);
+            padding: 15px;
+            border-radius: 12px;
+        """)
         
         subtitle = QLabel("Join the chemical analytics platform")
         subtitle.setAlignment(Qt.AlignCenter)
-        subtitle.setStyleSheet("font-size: 14px; color: rgba(255,255,255,0.8); margin-bottom: 20px;")
+        subtitle.setStyleSheet("font-size: 14px; color: #6c757d; margin-bottom: 20px; font-weight: normal;")
         
-        # Form fields
-        self.first_name = QLineEdit()
-        self.first_name.setPlaceholderText("First Name")
+        # Form fields with clear labels
+        fields = [
+            ("First Name:", "first_name", "First Name"),
+            ("Last Name:", "last_name", "Last Name"),
+            ("Username:", "username", "Username"),
+            ("Email:", "email", "Email Address"),
+            ("Password:", "password", "Password (min 6 characters)"),
+            ("Confirm Password:", "confirm_password", "Confirm Password")
+        ]
         
-        self.last_name = QLineEdit()
-        self.last_name.setPlaceholderText("Last Name")
+        for label_text, field_name, placeholder in fields:
+            label = QLabel(label_text)
+            label.setStyleSheet("font-size: 14px; color: #2c3e50; margin-bottom: 3px; margin-top: 5px;")
+            layout.addWidget(label)
+            
+            field = QLineEdit()
+            field.setPlaceholderText(placeholder)
+            if "password" in field_name.lower():
+                field.setEchoMode(QLineEdit.Password)
+            setattr(self, field_name, field)
+            layout.addWidget(field)
         
-        self.username = QLineEdit()
-        self.username.setPlaceholderText("Username")
-        
-        self.email = QLineEdit()
-        self.email.setPlaceholderText("Email Address")
-        
-        self.password = QLineEdit()
-        self.password.setPlaceholderText("Password (min 6 characters)")
-        self.password.setEchoMode(QLineEdit.Password)
-        
-        self.confirm_password = QLineEdit()
-        self.confirm_password.setPlaceholderText("Confirm Password")
-        self.confirm_password.setEchoMode(QLineEdit.Password)
-        
-        # Buttons
+        # Buttons with better spacing
         button_layout = QHBoxLayout()
+        button_layout.setSpacing(15)
         
         cancel_btn = QPushButton("❌ Cancel")
         cancel_btn.setObjectName("cancelBtn")
@@ -108,21 +119,8 @@ class SignupDialog(QDialog):
         button_layout.addWidget(cancel_btn)
         button_layout.addWidget(create_btn)
         
-        # Add all widgets
         layout.addWidget(title)
         layout.addWidget(subtitle)
-        layout.addWidget(QLabel("First Name:"))
-        layout.addWidget(self.first_name)
-        layout.addWidget(QLabel("Last Name:"))
-        layout.addWidget(self.last_name)
-        layout.addWidget(QLabel("Username:"))
-        layout.addWidget(self.username)
-        layout.addWidget(QLabel("Email:"))
-        layout.addWidget(self.email)
-        layout.addWidget(QLabel("Password:"))
-        layout.addWidget(self.password)
-        layout.addWidget(QLabel("Confirm Password:"))
-        layout.addWidget(self.confirm_password)
         layout.addLayout(button_layout)
         
         self.setLayout(layout)
@@ -173,29 +171,29 @@ class LoginDialog(QDialog):
         self.setStyleSheet("""
             QDialog {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
-                    stop:0 #2c3e50, stop:1 #34495e);
+                    stop:0 #f8f9fa, stop:1 #e9ecef);
             }
             QLabel {
-                color: white;
+                color: #2c3e50;
                 font-family: 'Segoe UI', Arial, sans-serif;
                 font-weight: bold;
             }
             QLineEdit {
                 padding: 15px;
-                border: 2px solid rgba(255,255,255,0.2);
+                border: 2px solid #dee2e6;
                 border-radius: 10px;
-                background: rgba(255,255,255,0.95);
+                background: white;
                 font-size: 14px;
                 color: #2c3e50;
-                font-weight: bold;
+                font-weight: normal;
             }
             QLineEdit:focus {
-                border: 2px solid #3498db;
-                background: white;
+                border: 2px solid #007bff;
+                background: #f8f9ff;
             }
             QPushButton {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #3498db, stop:1 #2980b9);
+                    stop:0 #007bff, stop:1 #0056b3);
                 color: white;
                 border: none;
                 padding: 15px 24px;
@@ -205,10 +203,10 @@ class LoginDialog(QDialog):
             }
             QPushButton:hover {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #2980b9, stop:1 #1f618d);
+                    stop:0 #0056b3, stop:1 #004085);
             }
             QPushButton:pressed {
-                background: #1f618d;
+                background: #004085;
             }
         """)
         
@@ -216,30 +214,40 @@ class LoginDialog(QDialog):
         layout.setSpacing(20)
         layout.setContentsMargins(40, 30, 40, 30)
         
-        # Logo and title
+        # Logo and title with better contrast
         title = QLabel("🧪 Chemora Desktop")
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("font-size: 28px; font-weight: bold; margin: 20px; color: white;")
+        title.setStyleSheet("""
+            font-size: 28px; 
+            font-weight: bold; 
+            margin: 20px; 
+            color: #2c3e50;
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                stop:0 #667eea, stop:1 #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+        """)
         
         subtitle = QLabel("Chemical Equipment Analytics Platform")
         subtitle.setAlignment(Qt.AlignCenter)
-        subtitle.setStyleSheet("font-size: 16px; color: rgba(255,255,255,0.9); margin-bottom: 30px;")
+        subtitle.setStyleSheet("font-size: 16px; color: #6c757d; margin-bottom: 30px; font-weight: normal;")
         
-        # Input fields with better labels
+        # Input fields with clear labels
         username_label = QLabel("Username:")
-        username_label.setStyleSheet("font-size: 14px; color: white; margin-bottom: 5px;")
+        username_label.setStyleSheet("font-size: 15px; color: #2c3e50; margin-bottom: 5px;")
         
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("Enter username (demo: admin)")
         
         password_label = QLabel("Password:")
-        password_label.setStyleSheet("font-size: 14px; color: white; margin-bottom: 5px; margin-top: 10px;")
+        password_label.setStyleSheet("font-size: 15px; color: #2c3e50; margin-bottom: 5px; margin-top: 10px;")
         
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("Enter password (demo: admin)")
         self.password_input.setEchoMode(QLineEdit.Password)
         
-        # Buttons
+        # Buttons with better styling
         login_btn = QPushButton("🚀 Sign In")
         login_btn.clicked.connect(self.accept)
         
@@ -247,7 +255,7 @@ class LoginDialog(QDialog):
         signup_btn.setStyleSheet("""
             QPushButton {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #27ae60, stop:1 #229954);
+                    stop:0 #28a745, stop:1 #1e7e34);
                 color: white;
                 border: none;
                 padding: 15px 24px;
@@ -257,14 +265,23 @@ class LoginDialog(QDialog):
             }
             QPushButton:hover {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #229954, stop:1 #1e8449);
+                    stop:0 #1e7e34, stop:1 #155724);
             }
         """)
         signup_btn.clicked.connect(self.show_signup)
         
         demo_label = QLabel("💡 Demo Credentials: admin / admin")
         demo_label.setAlignment(Qt.AlignCenter)
-        demo_label.setStyleSheet("font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 15px; font-weight: normal;")
+        demo_label.setStyleSheet("""
+            font-size: 13px; 
+            color: #6c757d; 
+            margin-top: 15px; 
+            font-weight: normal;
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ffeaa7;
+        """)
         
         layout.addWidget(title)
         layout.addWidget(subtitle)
