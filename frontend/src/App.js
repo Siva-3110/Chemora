@@ -6,7 +6,7 @@ import Signup from './components/Signup';
 import Dashboard from './components/Dashboard';
 import './App_fixed.css';
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -54,19 +54,26 @@ function App() {
         return { success: true };
       }
       
-      // Then try demo credentials and API authentication
-      const auth = btoa(`${credentials.username}:${credentials.password}`);
-      axios.defaults.headers.common['Authorization'] = `Basic ${auth}`;
+      // Try API authentication
+      const response = await axios.post(`${API_BASE}/login/`, {
+        username: credentials.username,
+        password: credentials.password
+      });
       
-      await axios.get(`${API_BASE}/datasets/`);
-      
-      localStorage.setItem('auth', JSON.stringify(credentials));
-      setUser({ username: credentials.username });
-      setIsAuthenticated(true);
-      setCurrentPage('dashboard');
-      return { success: true };
+      if (response.data.success) {
+        // Set up Basic Auth for subsequent requests
+        const auth = btoa(`${credentials.username}:${credentials.password}`);
+        axios.defaults.headers.common['Authorization'] = `Basic ${auth}`;
+        
+        localStorage.setItem('auth', JSON.stringify(credentials));
+        setUser({ username: credentials.username });
+        setIsAuthenticated(true);
+        setCurrentPage('dashboard');
+        return { success: true };
+      }
     } catch (error) {
-      return { success: false, error: 'Invalid credentials' };
+      console.error('Login error:', error);
+      return { success: false, error: error.response?.data?.error || 'Invalid credentials' };
     }
   };
 
