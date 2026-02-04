@@ -71,9 +71,11 @@ function App() {
         setCurrentPage('dashboard');
         return { success: true };
       }
+      
+      return { success: false, error: 'Invalid credentials' };
     } catch (error) {
       console.error('Login error:', error);
-      return { success: false, error: error.response?.data?.error || 'Invalid credentials' };
+      return { success: false, error: error.response?.data?.error || 'Connection failed. Please check if the server is running.' };
     }
   };
 
