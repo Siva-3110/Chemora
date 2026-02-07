@@ -12,7 +12,7 @@ function Dashboard({ user, onLogout, apiBase }) {
 
   useEffect(() => {
     loadDatasets();
-  }, []);
+  }, [user.username]); // Reload when user changes
 
   const loadDatasets = async () => {
     try {
@@ -21,6 +21,9 @@ function Dashboard({ user, onLogout, apiBase }) {
       setDatasets(response.data);
     } catch (error) {
       console.error('Error loading datasets:', error);
+      // Load user-specific mock data if API fails
+      const userDatasets = JSON.parse(localStorage.getItem(`mockDatasets_${user.username}`) || '[]');
+      setDatasets(userDatasets);
     } finally {
       setLoading(false);
     }
@@ -40,7 +43,8 @@ function Dashboard({ user, onLogout, apiBase }) {
             selectedDataset={selectedDataset}
             onDatasetSelect={setSelectedDataset}
             onDatasetChange={loadDatasets}
-            apiBase={apiBase} 
+            apiBase={apiBase}
+            user={user}
           />
         );
       case 'history':
@@ -59,7 +63,8 @@ function Dashboard({ user, onLogout, apiBase }) {
             selectedDataset={selectedDataset}
             onDatasetSelect={setSelectedDataset}
             onDatasetChange={loadDatasets}
-            apiBase={apiBase} 
+            apiBase={apiBase}
+            user={user}
           />
         );
     }

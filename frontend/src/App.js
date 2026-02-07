@@ -30,30 +30,25 @@ function App() {
       if (localUser || parsed.username === 'admin') {
         setUser({ username: parsed.username });
         setIsAuthenticated(true);
-        if (parsed.username === 'admin') {
-          axios.defaults.headers.common['Authorization'] = `Basic ${btoa(`${parsed.username}:${parsed.password}`)}`;
-        }
+        // Set Authorization header for all users
+        const authHeader = `Basic ${btoa(`${parsed.username}:${parsed.password}`)}`;
+        axios.defaults.headers.common['Authorization'] = authHeader;
       }
     }
     setLoading(false);
   };
 
   const handleLogin = async (credentials) => {
+    // Always allow admin/admin for demo purposes
+    if (credentials.username === 'admin' && credentials.password === 'admin') {
+      localStorage.setItem('auth', JSON.stringify(credentials));
+      setUser({ username: credentials.username });
+      setIsAuthenticated(true);
+      setCurrentPage('dashboard');
+      return { success: true };
+    }
+    
     try {
-      // First check locally registered users
-      const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      const localUser = users.find(user => 
-        user.username === credentials.username && user.password === credentials.password
-      );
-      
-      if (localUser) {
-        localStorage.setItem('auth', JSON.stringify(credentials));
-        setUser({ username: credentials.username });
-        setIsAuthenticated(true);
-        setCurrentPage('dashboard');
-        return { success: true };
-      }
-      
       // Try API authentication
       const response = await axios.post(`${API_BASE}/login/`, {
         username: credentials.username,
@@ -61,7 +56,6 @@ function App() {
       });
       
       if (response.data.success) {
-        // Set up Basic Auth for subsequent requests
         const auth = btoa(`${credentials.username}:${credentials.password}`);
         axios.defaults.headers.common['Authorization'] = `Basic ${auth}`;
         
@@ -75,7 +69,22 @@ function App() {
       return { success: false, error: 'Invalid credentials' };
     } catch (error) {
       console.error('Login error:', error);
-      return { success: false, error: error.response?.data?.error || 'Connection failed. Please check if the server is running.' };
+      
+      // Fallback to local users
+      const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+      const localUser = users.find(user => 
+        user.username === credentials.username && user.password === credentials.password
+      );
+      
+      if (localUser) {
+        localStorage.setItem('auth', JSON.stringify(credentials));
+        setUser({ username: credentials.username });
+        setIsAuthenticated(true);
+        setCurrentPage('dashboard');
+        return { success: true };
+      }
+      
+      return { success: false, error: 'Connection failed. Please check if the server is running.' };
     }
   };
 
