@@ -21,9 +21,15 @@ from io import BytesIO
 from .models import Dataset, Equipment
 from .serializers import DatasetSerializer, EquipmentSerializer
 
+import logging
+from datetime import datetime
+
+logger = logging.getLogger(__name__)
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_view(request):
+    logger.info(f"🔵 REGISTER API CALL - Username: {request.data.get('username')}")
     username = request.data.get('username')
     password = request.data.get('password')
     email = request.data.get('email')
@@ -58,6 +64,9 @@ def register_view(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
+    print(f"\n🔑 LOGIN API CALL - Username: {request.data.get('username')}")
+    print(f"   Time: {datetime.now().strftime('%H:%M:%S')}")
+    logger.info(f"🔑 LOGIN API CALL - Username: {request.data.get('username')}")
     username = request.data.get('username')
     password = request.data.get('password')
     
@@ -77,6 +86,9 @@ def login_view(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def upload_csv(request):
+    print(f"\n📄 UPLOAD API CALL - User: {request.user.username}")
+    print(f"   Time: {datetime.now().strftime('%H:%M:%S')}")
+    logger.info(f"📄 UPLOAD API CALL - User: {request.user.username}")
     if 'file' not in request.FILES:
         return Response({'error': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -128,6 +140,9 @@ def upload_csv(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_datasets(request):
+    print(f"\n📁 GET DATASETS API CALL - User: {request.user.username}")
+    print(f"   Time: {datetime.now().strftime('%H:%M:%S')}")
+    logger.info(f"📁 GET DATASETS API CALL - User: {request.user.username}")
     datasets = Dataset.objects.filter(uploaded_by=request.user)
     serializer = DatasetSerializer(datasets, many=True)
     return Response(serializer.data)
