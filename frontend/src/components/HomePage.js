@@ -239,7 +239,8 @@ function HomePage({ onNavigate }) {
               <span>Chemora</span>
             </div>
             <div className="footer-text">
-              Academic internship project for CSV-based chemical equipment data analysis and intelligent visualization.
+              CSV-based chemical equipment data analysis and intelligent visualization<br></br>
+              Crafted for Engineers.
             </div>
           </div>
         </div>
