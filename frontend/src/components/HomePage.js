@@ -36,9 +36,7 @@ function HomePage({ onNavigate }) {
                 <button onClick={() => onNavigate('dashboard')} className="btn-primary-large">
                   Upload CSV & Analyze
                 </button>
-                <button onClick={() => onNavigate('demo')} className="btn-secondary-large">
-                  View Sample Dashboard
-                </button>
+                
               </div>
             </div>
             <div className="hero-visual">
