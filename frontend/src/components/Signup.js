@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
 function Signup({ onNavigate }) {
   const [formData, setFormData] = useState({
@@ -32,35 +35,35 @@ function Signup({ onNavigate }) {
       return;
     }
 
-    // Store user credentials locally
-    const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-    
-    // Check if username already exists
-    if (users.find(user => user.username === formData.username)) {
-      setError('Username already exists');
+    try {
+      // Create user via Django API
+      const response = await axios.post(`${API_BASE}/register/`, {
+        username: formData.username,
+        password: formData.password,
+        email: formData.email,
+        first_name: formData.firstName,
+        last_name: formData.lastName
+      });
+
+      if (response.data.success) {
+        setSuccess(true);
+        setTimeout(() => {
+          onNavigate && onNavigate('login');
+        }, 2000);
+      } else {
+        setError(response.data.error || 'Registration failed');
+      }
+    } catch (error) {
+      if (error.response?.data?.error) {
+        setError(error.response.data.error);
+      } else if (error.response?.data?.username) {
+        setError('Username already exists');
+      } else {
+        setError('Registration failed. Please try again.');
+      }
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Add new user
-    const newUser = {
-      username: formData.username,
-      password: formData.password,
-      email: formData.email,
-      firstName: formData.firstName,
-      lastName: formData.lastName
-    };
-    
-    users.push(newUser);
-    localStorage.setItem('registeredUsers', JSON.stringify(users));
-
-    setTimeout(() => {
-      setSuccess(true);
-      setLoading(false);
-      setTimeout(() => {
-        onNavigate && onNavigate('login');
-      }, 2000);
-    }, 1500);
   };
 
   const handleInputChange = (field, value) => {

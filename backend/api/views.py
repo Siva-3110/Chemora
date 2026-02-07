@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from django.http import HttpResponse
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -19,6 +20,40 @@ from reportlab.lib.units import inch
 from io import BytesIO
 from .models import Dataset, Equipment
 from .serializers import DatasetSerializer, EquipmentSerializer
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register_view(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    email = request.data.get('email')
+    first_name = request.data.get('first_name', '')
+    last_name = request.data.get('last_name', '')
+    
+    if not username or not password or not email:
+        return Response({'error': 'Username, password, and email are required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if User.objects.filter(username=username).exists():
+        return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if User.objects.filter(email=email).exists():
+        return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            email=email,
+            first_name=first_name,
+            last_name=last_name
+        )
+        return Response({
+            'success': True,
+            'message': 'User created successfully',
+            'username': user.username
+        })
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])

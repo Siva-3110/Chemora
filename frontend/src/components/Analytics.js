@@ -109,83 +109,15 @@ function Analytics({ datasets, selectedDataset, onDatasetSelect, apiBase, onData
       setSelectedFile(null);
       onDatasetChange();
     } catch (error) {
-      console.error('Upload error:', error);
-      // Mock upload functionality when API fails
-      await handleMockUpload();
+      const errorMsg = error.response?.data?.error || 'Upload failed';
+      if (errorMsg.includes('columns')) {
+        setError('Required columns missing: Equipment Name, Type, Flowrate, Pressure, Temperature');
+      } else {
+        setError(errorMsg);
+      }
     } finally {
       setUploading(false);
     }
-  };
-
-  const handleMockUpload = async () => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Parse CSV and create mock dataset
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const csv = e.target.result;
-            const lines = csv.split('\n');
-            const headers = lines[0].split(',').map(h => h.trim());
-            
-            // Validate required columns
-            const requiredColumns = ['Equipment Name', 'Type', 'Flowrate', 'Pressure', 'Temperature'];
-            const hasAllColumns = requiredColumns.every(col => headers.includes(col));
-            
-            if (!hasAllColumns) {
-              setError('Required columns missing: Equipment Name, Type, Flowrate, Pressure, Temperature');
-              resolve();
-              return;
-            }
-            
-            const equipmentData = [];
-            for (let i = 1; i < lines.length; i++) {
-              if (lines[i].trim()) {
-                const values = lines[i].split(',').map(v => v.trim());
-                const equipment = {};
-                headers.forEach((header, index) => {
-                  equipment[header.toLowerCase().replace(' ', '_')] = values[index];
-                });
-                equipmentData.push({
-                  name: equipment.equipment_name,
-                  type: equipment.type,
-                  flowrate: parseFloat(equipment.flowrate) || 0,
-                  pressure: parseFloat(equipment.pressure) || 0,
-                  temperature: parseFloat(equipment.temperature) || 0
-                });
-              }
-            }
-            
-            // Create mock dataset
-            const newDataset = {
-              id: Date.now(),
-              name: selectedFile.name,
-              equipment_count: equipmentData.length,
-              uploaded_at: new Date().toISOString(),
-              equipment_data: equipmentData
-            };
-            
-            // Save to user-specific localStorage
-            const existingDatasets = JSON.parse(localStorage.getItem(`mockDatasets_${user.username}`) || '[]');
-            const updatedDatasets = [newDataset, ...existingDatasets.slice(0, 4)]; // Keep only 5 datasets
-            localStorage.setItem(`mockDatasets_${user.username}`, JSON.stringify(updatedDatasets));
-            
-            setUploadResult({
-              name: selectedFile.name,
-              equipmentCount: equipmentData.length
-            });
-            
-            setSelectedFile(null);
-            onDatasetChange();
-            resolve();
-          } catch (parseError) {
-            setError('Error parsing CSV file. Please check the format.');
-            resolve();
-          }
-        };
-        reader.readAsText(selectedFile);
-      }, 1000); // Simulate upload delay
-    });
   };
 
   const loadAnalyticsData = async (datasetId) => {
@@ -200,34 +132,8 @@ function Analytics({ datasets, selectedDataset, onDatasetSelect, apiBase, onData
       setSummary(summaryResponse.data);
     } catch (error) {
       console.error('Error loading analytics data:', error);
-      // Load user-specific mock data
-      const userDatasets = JSON.parse(localStorage.getItem(`mockDatasets_${user.username}`) || '[]');
-      const dataset = userDatasets.find(d => d.id === datasetId);
-      
-      if (dataset && dataset.equipment_data) {
-        const equipmentData = dataset.equipment_data;
-        setEquipmentData(equipmentData);
-        
-        // Calculate summary
-        const flowrates = equipmentData.map(e => e.flowrate);
-        const pressures = equipmentData.map(e => e.pressure);
-        const temperatures = equipmentData.map(e => e.temperature);
-        
-        const typeDistribution = {};
-        equipmentData.forEach(e => {
-          typeDistribution[e.type] = (typeDistribution[e.type] || 0) + 1;
-        });
-        
-        const mockSummary = {
-          total_count: equipmentData.length,
-          avg_flowrate: flowrates.reduce((a, b) => a + b, 0) / flowrates.length,
-          avg_pressure: pressures.reduce((a, b) => a + b, 0) / pressures.length,
-          avg_temperature: temperatures.reduce((a, b) => a + b, 0) / temperatures.length,
-          type_distribution: typeDistribution
-        };
-        
-        setSummary(mockSummary);
-      }
+      setEquipmentData([]);
+      setSummary(null);
     } finally {
       setLoading(false);
     }

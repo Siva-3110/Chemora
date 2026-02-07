@@ -21,9 +21,7 @@ function Dashboard({ user, onLogout, apiBase }) {
       setDatasets(response.data);
     } catch (error) {
       console.error('Error loading datasets:', error);
-      // Load user-specific mock data if API fails
-      const userDatasets = JSON.parse(localStorage.getItem(`mockDatasets_${user.username}`) || '[]');
-      setDatasets(userDatasets);
+      setDatasets([]);
     } finally {
       setLoading(false);
     }

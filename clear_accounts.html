@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Accounts</title>
+</head>
+<body>
+    <h1>Account Management</h1>
+    <button onclick="clearAccounts()">Delete All Registered Accounts</button>
+    <div id="result"></div>
+
+    <script>
+        function clearAccounts() {
+            // Clear all registered users
+            localStorage.removeItem('registeredUsers');
+            localStorage.removeItem('auth');
+            
+            document.getElementById('result').innerHTML = `
+                <h3>✅ All registered accounts deleted!</h3>
+                <p>Only the built-in admin account remains:</p>
+                <p><strong>Username:</strong> admin | <strong>Password:</strong> admin</p>
+                <p>You can now create new accounts as needed.</p>
+            `;
+        }
+    </script>
+</body>
+</html>

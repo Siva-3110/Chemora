@@ -39,17 +39,8 @@ function App() {
   };
 
   const handleLogin = async (credentials) => {
-    // Always allow admin/admin for demo purposes
-    if (credentials.username === 'admin' && credentials.password === 'admin') {
-      localStorage.setItem('auth', JSON.stringify(credentials));
-      setUser({ username: credentials.username });
-      setIsAuthenticated(true);
-      setCurrentPage('dashboard');
-      return { success: true };
-    }
-    
     try {
-      // Try API authentication
+      // Only use API authentication
       const response = await axios.post(`${API_BASE}/login/`, {
         username: credentials.username,
         password: credentials.password
@@ -69,21 +60,6 @@ function App() {
       return { success: false, error: 'Invalid credentials' };
     } catch (error) {
       console.error('Login error:', error);
-      
-      // Fallback to local users
-      const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      const localUser = users.find(user => 
-        user.username === credentials.username && user.password === credentials.password
-      );
-      
-      if (localUser) {
-        localStorage.setItem('auth', JSON.stringify(credentials));
-        setUser({ username: credentials.username });
-        setIsAuthenticated(true);
-        setCurrentPage('dashboard');
-        return { success: true };
-      }
-      
       return { success: false, error: 'Connection failed. Please check if the server is running.' };
     }
   };

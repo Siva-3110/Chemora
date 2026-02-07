@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug localStorage</title>
+</head>
+<body>
+    <h1>Debug localStorage Data</h1>
+    <button onclick="showData()">Show All Data</button>
+    <button onclick="clearData()">Clear All Data</button>
+    <div id="output"></div>
+
+    <script>
+        function showData() {
+            const mockDatasets = JSON.parse(localStorage.getItem('mockDatasets') || '[]');
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+            const auth = localStorage.getItem('auth');
+            
+            document.getElementById('output').innerHTML = `
+                <h3>Mock Datasets (${mockDatasets.length}):</h3>
+                <pre>${JSON.stringify(mockDatasets, null, 2)}</pre>
+                
+                <h3>Registered Users (${registeredUsers.length}):</h3>
+                <pre>${JSON.stringify(registeredUsers, null, 2)}</pre>
+                
+                <h3>Current Auth:</h3>
+                <pre>${auth}</pre>
+            `;
+        }
+        
+        function clearData() {
+            localStorage.removeItem('mockDatasets');
+            localStorage.removeItem('registeredUsers');
+            localStorage.removeItem('auth');
+            alert('All data cleared!');
+        }
+    </script>
+</body>
+</html>
